@@ -2,14 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
 st.title("🏆 Калькулятор Обаяния и Близости")
-
-
-# Настройка глобального стиля отображения
-st.markdown("""
-<style>
-    .stNumberInput {margin-bottom: -10px;}
-</style>
-""", unsafe_allowed_html=True)
+st.caption("Точный расчет по игровым механикам")
 
 tab1, tab2 = st.tabs(["✨ Расчет Обаяния", "❤️ Расчет Близости"])
 
