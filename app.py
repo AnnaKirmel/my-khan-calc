@@ -2,40 +2,48 @@ import streamlit as st
 
 st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
 st.title("🏆 Калькулятор Обаяния и Близости")
-st.caption("by ТаЙга | Мобильная версия")
 
-# Создаем вкладки для удобства, чтобы не перегружать экран
+
+# Настройка глобального стиля отображения
+st.markdown("""
+<style>
+    .stNumberInput {margin-bottom: -10px;}
+</style>
+""", unsafe_allowed_html=True)
+
 tab1, tab2 = st.tabs(["✨ Расчет Обаяния", "❤️ Расчет Близости"])
 
 with tab1:
     st.header("Расчет минимального количества Обаяния")
     
-    # Константы для расчета предметов (весов/ценностей предметов)
-    # ПРИМЕЧАНИЕ: Впишите сюда реальные значения очков из игры, если они фиксированные!
-    # Сейчас стоят базовые множители (1 предмет = 1 очко), замените цифры на игровые.
-    VAL_DUHI = 1
-    VAL_SER_SHP = 2
-    VAL_ZOL_SHP = 5
-    VAL_HADAK = 10
-    VAL_SIN_HADAK = 20
+    st.subheader("👥 Ваши данные")
+    kol_nalozhnic = st.number_input("Текущее количество наложниц:", min_value=1, value=10, help="Крайне важно для массовых предметов вроде Хадаков!")
     
     st.subheader("📦 Ресурсы со склада")
-    kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0, help="<-Задания-Достижения-Монарх-романтик")
-    duhi = st.number_input("Духи:", min_value=0, value=0)
-    ser_shpilka = st.number_input("Серебряная шпилька:", min_value=0, value=0)
-    zol_shpilka = st.number_input("Золотая шпилька:", min_value=0, value=0)
-    hadak = st.number_input("Хадак:", min_value=0, value=0)
-    sin_hadak = st.number_input("Синий Хадак:", min_value=0, value=0)
+    duhi = st.number_input("Духи (+1 очко):", min_value=0, value=0)
+    
+    # Логика для случайных предметов
+    mode_ob = st.radio("Как калькулировать случайные предметы Обаяния (2-5 ед. / 1-3 ед.)?", 
+                       ["По гарантированному минимуму", "По среднему значению"], 
+                       horizontal=True, key="mode_ob")
+    
+    val_ser_shp = 2 if "минимуму" in mode_ob else 3.5
+    val_sin_hadak = 1 if "минимуму" in mode_ob else 2
+    
+    ser_shpilka = st.number_input("Серебряная шпилька (дает 2–5):", min_value=0, value=0)
+    zol_shpilka = st.number_input("Золотая шпилька (+5 стабильно):", min_value=0, value=0)
+    
+    hadak = st.number_input("Белый хадак (+1 ВСЕМ наложницам):", min_value=0, value=0)
+    sin_hadak = st.number_input("Синий хадак (1–3 ВСЕМ наложницам):", min_value=0, value=0)
     
     st.subheader("🎁 Сундуки и Фураж")
-    red_sunduki = st.number_input("Красные сундуки (кол-во):", min_value=0, value=0)
-    ob_za_100_sun = st.number_input("Сколько обаяния дало 100 красных сундуков?:", min_value=0, value=0, help="Посмотреть значения в рейтинге ДО, открыть 100 сундуков, посмотреть значение после, вписать разницу")
+    red_sunduki = st.number_input("Красные сундуки (шт.):", min_value=0, value=0)
+    ob_za_100_sun = st.number_input("Сколько обаяния принесли 100 красных сундуков?:", min_value=0, value=0)
     furazh = st.number_input("Фураж (обаяние):", min_value=0, value=0)
     
     st.subheader("💃 Наложницы для призыва")
-    st.info("Впишите кол-во обаяния, если планируете призывать наложницу в рейтинг. Если не призываете — оставьте 0.")
+    st.info("Впишите очки обаяния, если планируете призывать наложниц в рейтинг.")
     
-    # Список наложниц из вашего файла
     girls = [
         "Бадра", "Маша", "Байлина", "Медея", "Бастет", "Милана", "Ильза", "Ника", 
         "Ипполита", "Паулина", "Кармилла", "Родия", "Каталин", "Сигрид", "Киара", 
@@ -46,175 +54,68 @@ with tab1:
     ]
     
     sum_girls_ob = 0
-    # Разделим наложниц на 2 колонки, чтобы на телефоне это выглядело компактно
     col1, col2 = st.columns(2)
     for i, girl in enumerate(girls):
         with col1 if i % 2 == 0 else col2:
             val = st.number_input(f"{girl}:", min_value=0, value=0, key=f"ob_{girl}")
             sum_girls_ob += val
 
-    # Математика расчета Обаяния
-    # Считаем сундуки (если введено значение за 100 сундуков)
+    # МАТЕМАТИКА ОБАЯНИЯ
     avg_sunduk_val = (ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
     sunduki_total = red_sunduki * avg_sunduk_val
+    
+    # Массовый эффект хадаков
+    hadak_total = hadak * kol_nalozhnic
+    sin_hadak_total = sin_hadak * val_sin_hadak * kol_nalozhnic
 
     total_ob = (
-        (duhi * VAL_DUHI) + 
-        (ser_shpilka * VAL_SER_SHP) + 
-        (zol_shpilka * VAL_ZOL_SHP) + 
-        (hadak * VAL_HADAK) + 
-        (sin_hadak * VAL_SIN_HADAK) + 
+        (duhi * 1) + 
+        (ser_shpilka * val_ser_shp) + 
+        (zol_shpilka * 5) + 
+        hadak_total + 
+        sin_hadak_total + 
         sunduki_total + 
         furazh + 
         sum_girls_ob
     )
     
-    st.metric(label="✨ Итого минимальное количество обаяния:", value=f"{int(total_ob)}")
-    st.caption("⚠️ Данное значение минимальное, т.к. красные сундуки и фураж дают рандомное количество очков.")
+    st.metric(label="✨ Итоговый прирост Обаяния:", value=f"{int(total_ob)}")
 
 with tab2:
-    st.header("Расчет минимального количества Близости")
+    st.header("Расчет количества Близости")
     
-    # Константы для расчета предметов Близости
-    # Замените 1, 2, 5 и т.д. на реальные очки, которые дает предмет в игре Великий Хан
-    VAL_KOLCO = 1
-    VAL_SERGI = 2
-    VAL_SANDAL = 5
-    VAL_NEFRIT = 10
-    VAL_TAKYA = 20
-    VAL_ORDOS = 50
-
+    st.subheader("👥 Ваши данные")
+    kol_nalozhnic_bl = st.number_input("Количество наложниц (для расчета Близости):", min_value=1, value=10)
+    
     st.subheader("📦 Ресурсы со склада")
-    kol_nalozhnic_bl = st.number_input("Количество наложниц (Близость):", min_value=0, value=0)
-    kolca = st.number_input("Кольца:", min_value=0, value=0)
-    sergi = st.number_input("Серьги:", min_value=0, value=0)
-    sandal = st.number_input("Сандаловый браслет:", min_value=0, value=0)
-    nefrit = st.number_input("Нефритовый браслет:", min_value=0, value=0)
-    takya = st.number_input("Такъя:", min_value=0, value=0)
-    ordos = st.number_input("Ордос:", min_value=0, value=0)
+    kolca = st.number_input("Самоцветное кольцо (+1 очко):", min_value=0, value=0)
+    sergi = st.number_input("Золотые серьги (+2 очка):", min_value=0, value=0)
+    
+    mode_bl = st.radio("Как калькулировать Сандаловый браслет (2-5 ед.)?", 
+                       ["По гарантированному минимуму (2 очка)", "По среднему значению (3.5 очка)"], 
+                       horizontal=True, key="mode_bl")
+    val_sandal = 2 if "минимуму" in mode_bl else 3.5
+    
+    sandal = st.number_input("Сандаловый браслет (дает 2–5):", min_value=0, value=0)
+    nefrit = st.number_input("Нефритовый браслет (+5 стабильно):", min_value=0, value=0)
+    
+    takya = st.number_input("Такъя (+1 Близости ВСЕМ наложницам):", min_value=0, value=0)
+    ordos = st.number_input("Ордос (+50 очков):", min_value=0, value=0)
     
     st.subheader("🌾 Дополнительно")
     furazh_bl = st.number_input("Фураж (близость):", min_value=0, value=0)
     
-    # Математика расчета Близости
+    # МАТЕМАТИКА БЛИЗОСТИ
+    takya_total = takya * kol_nalozhnic_bl
+    
     total_bl = (
-        (kolca * VAL_KOLCO) +
-        (sergi * VAL_SERGI) +
-        (sandal * VAL_SANDAL) +
-        (nefrit * VAL_NEFRIT) +
-        (takya * VAL_TAKYA) +
-        (ordos * VAL_ORDOS) +
+        (kolca * 1) +
+        (sergi * 2) +
+        (sandal * val_sandal) +
+        (nefrit * 5) +
+        takya_total +
+        (ordos * 50) +
         furazh_bl
     )
     
-    st.metric(label="❤️ Итого минимальное количество близости:", value=f"{int(total_bl)}")
-import streamlit as st
-
-st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
-st.title("🏆 Калькулятор Обаяния и Близости")
-st.caption("by ТаЙга | Мобильная версия")
-
-# Создаем вкладки для удобства, чтобы не перегружать экран
-tab1, tab2 = st.tabs(["✨ Расчет Обаяния", "❤️ Расчет Близости"])
-
-with tab1:
-    st.header("Расчет минимального количества Обаяния")
-    
-    # Константы для расчета предметов (весов/ценностей предметов)
-    # ПРИМЕЧАНИЕ: Впишите сюда реальные значения очков из игры, если они фиксированные!
-    # Сейчас стоят базовые множители (1 предмет = 1 очко), замените цифры на игровые.
-    VAL_DUHI = 1
-    VAL_SER_SHP = 2
-    VAL_ZOL_SHP = 5
-    VAL_HADAK = 10
-    VAL_SIN_HADAK = 20
-    
-    st.subheader("📦 Ресурсы со склада")
-    kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0, help="<-Задания-Достижения-Монарх-романтик")
-    duhi = st.number_input("Духи:", min_value=0, value=0)
-    ser_shpilka = st.number_input("Серебряная шпилька:", min_value=0, value=0)
-    zol_shpilka = st.number_input("Золотая шпилька:", min_value=0, value=0)
-    hadak = st.number_input("Хадак:", min_value=0, value=0)
-    sin_hadak = st.number_input("Синий Хадак:", min_value=0, value=0)
-    
-    st.subheader("🎁 Сундуки и Фураж")
-    red_sunduki = st.number_input("Красные сундуки (кол-во):", min_value=0, value=0)
-    ob_za_100_sun = st.number_input("Сколько обаяния дало 100 красных сундуков?:", min_value=0, value=0, help="Посмотреть значения в рейтинге ДО, открыть 100 сундуков, посмотреть значение после, вписать разницу")
-    furazh = st.number_input("Фураж (обаяние):", min_value=0, value=0)
-    
-    st.subheader("💃 Наложницы для призыва")
-    st.info("Впишите кол-во обаяния, если планируете призывать наложницу в рейтинг. Если не призываете — оставьте 0.")
-    
-    # Список наложниц из вашего файла
-    girls = [
-        "Бадра", "Маша", "Байлина", "Медея", "Бастет", "Милана", "Ильза", "Ника", 
-        "Ипполита", "Паулина", "Кармилла", "Родия", "Каталин", "Сигрид", "Киара", 
-        "Тамара", "Кларисса", "Табити", "Корэна", "Ува", "Кунегурда", "Улана", 
-        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия", 
-        "Анар (Дочь вечности)", "Земея (Дочь вечности)", "Айрис (Дочь вечности)", 
-        "Амар (Дочь вечности)", "Иветт (Дочь вечности)", "Вилма (Дочь вечности)"
-    ]
-    
-    sum_girls_ob = 0
-    # Разделим наложниц на 2 колонки, чтобы на телефоне это выглядело компактно
-    col1, col2 = st.columns(2)
-    for i, girl in enumerate(girls):
-        with col1 if i % 2 == 0 else col2:
-            val = st.number_input(f"{girl}:", min_value=0, value=0, key=f"ob_{girl}")
-            sum_girls_ob += val
-
-    # Математика расчета Обаяния
-    # Считаем сундуки (если введено значение за 100 сундуков)
-    avg_sunduk_val = (ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
-    sunduki_total = red_sunduki * avg_sunduk_val
-
-    total_ob = (
-        (duhi * VAL_DUHI) + 
-        (ser_shpilka * VAL_SER_SHP) + 
-        (zol_shpilka * VAL_ZOL_SHP) + 
-        (hadak * VAL_HADAK) + 
-        (sin_hadak * VAL_SIN_HADAK) + 
-        sunduki_total + 
-        furazh + 
-        sum_girls_ob
-    )
-    
-    st.metric(label="✨ Итого минимальное количество обаяния:", value=f"{int(total_ob)}")
-    st.caption("⚠️ Данное значение минимальное, т.к. красные сундуки и фураж дают рандомное количество очков.")
-
-with tab2:
-    st.header("Расчет минимального количества Близости")
-    
-    # Константы для расчета предметов Близости
-    # Замените 1, 2, 5 и т.д. на реальные очки, которые дает предмет в игре Великий Хан
-    VAL_KOLCO = 1
-    VAL_SERGI = 2
-    VAL_SANDAL = 5
-    VAL_NEFRIT = 10
-    VAL_TAKYA = 20
-    VAL_ORDOS = 50
-
-    st.subheader("📦 Ресурсы со склада")
-    kol_nalozhnic_bl = st.number_input("Количество наложниц (Близость):", min_value=0, value=0)
-    kolca = st.number_input("Кольца:", min_value=0, value=0)
-    sergi = st.number_input("Серьги:", min_value=0, value=0)
-    sandal = st.number_input("Сандаловый браслет:", min_value=0, value=0)
-    nefrit = st.number_input("Нефритовый браслет:", min_value=0, value=0)
-    takya = st.number_input("Такъя:", min_value=0, value=0)
-    ordos = st.number_input("Ордос:", min_value=0, value=0)
-    
-    st.subheader("🌾 Дополнительно")
-    furazh_bl = st.number_input("Фураж (близость):", min_value=0, value=0)
-    
-    # Математика расчета Близости
-    total_bl = (
-        (kolca * VAL_KOLCO) +
-        (sergi * VAL_SERGI) +
-        (sandal * VAL_SANDAL) +
-        (nefrit * VAL_NEFRIT) +
-        (takya * VAL_TAKYA) +
-        (ordos * VAL_ORDOS) +
-        furazh_bl
-    )
-    
-    st.metric(label="❤️ Итого минимальное количество близости:", value=f"{int(total_bl)}")
+    st.metric(label="❤️ Итоговый прирост Близости:", value=f"{int(total_bl)}")
