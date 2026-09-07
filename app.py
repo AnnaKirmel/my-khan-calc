@@ -1,114 +1,113 @@
 import streamlit as st
 
 st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
-st.title("🏆 Калькулятор Обаяния и Близости")
-st.caption("Точный расчет по игровым механикам")
+st.title("🏆 Калькулятор ресурсов")
+st.caption("Мобильная версия")
 
-tab1, tab2 = st.tabs(["✨ Расчет Обаяния", "❤️ Расчет Близости"])
+tab1, tab2 = st.tabs(["✨ Обаяние", "❤️ Близость"])
 
 with tab1:
-    st.header("Расчет минимального количества Обаяния")
+    st.header("Расчет Обаяния")
     
-    st.subheader("👥 Ваши данные")
-    kol_nalozhnic = st.number_input("Текущее количество наложниц:", min_value=1, value=10, help="Крайне важно для массовых предметов вроде Хадаков!")
+    st.subheader("👥 Ваши наложницы")
+    b4_val = st.number_input("Дополнительные наложницы (из Заданий / Достижений):", min_value=0, value=0, key="ob_b4")
     
-    st.subheader("📦 Ресурсы со склада")
-    duhi = st.number_input("Духи (+1 очко):", min_value=0, value=0)
+    st.subheader("📦 Предметы со склада")
+    b5_duhi = st.number_input("Духи:", min_value=0, value=0)
+    b6_ser_shp = st.number_input("Серебряная шпилька:", min_value=0, value=0)
+    b7_zol_shp = st.number_input("Золотая шпилька:", min_value=0, value=0)
+    b8_bel_hadak = st.number_input("Белый хадак:", min_value=0, value=0)
+    b9_sin_hadak = st.number_input("Синий хадак:", min_value=0, value=0)
     
-    # Логика для случайных предметов
-    mode_ob = st.radio("Как калькулировать случайные предметы Обаяния (2-5 ед. / 1-3 ед.)?", 
-                       ["По гарантированному минимуму", "По среднему значению"], 
-                       horizontal=True, key="mode_ob")
+    st.subheader("📊 Сундуки и дополнительно")
+    b10_val = st.number_input("Количество красных сундуков:", min_value=0, value=0)
+    b11_val = st.number_input("Сколько очков дали 100 сундуков?:", min_value=0, value=0)
+    b12_val = st.number_input("Фураж (Обаяние):", min_value=0, value=0)
     
-    val_ser_shp = 2 if "минимуму" in mode_ob else 3.5
-    val_sin_hadak = 1 if "минимуму" in mode_ob else 2
+    st.subheader("💃 Текущие очки наложниц")
+    st.info("Впишите текущие очки только тех наложниц, которых планируете прокачивать.")
     
-    ser_shpilka = st.number_input("Серебряная шпилька (дает 2–5):", min_value=0, value=0)
-    zol_shpilka = st.number_input("Золотая шпилька (+5 стабильно):", min_value=0, value=0)
-    
-    hadak = st.number_input("Белый хадак (+1 ВСЕМ наложницам):", min_value=0, value=0)
-    sin_hadak = st.number_input("Синий хадак (1–3 ВСЕМ наложницам):", min_value=0, value=0)
-    
-    st.subheader("🎁 Сундуки и Фураж")
-    red_sunduki = st.number_input("Красные сундуки (шт.):", min_value=0, value=0)
-    ob_za_100_sun = st.number_input("Сколько обаяния принесли 100 красных сундуков?:", min_value=0, value=0)
-    furazh = st.number_input("Фураж (обаяние):", min_value=0, value=0)
-    
-    st.subheader("💃 Наложницы для призыва")
-    st.info("Впишите очки обаяния, если планируете призывать наложниц в рейтинг.")
-    
-    girls = [
+    regular_girls = [
         "Бадра", "Маша", "Байлина", "Медея", "Бастет", "Милана", "Ильза", "Ника", 
         "Ипполита", "Паулина", "Кармилла", "Родия", "Каталин", "Сигрид", "Киара", 
         "Тамара", "Кларисса", "Табити", "Корэна", "Ува", "Кунегурда", "Улана", 
-        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия", 
+        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия"
+    ]
+    
+    eternity_girls = [
         "Анар (Дочь вечности)", "Земея (Дочь вечности)", "Айрис (Дочь вечности)", 
         "Амар (Дочь вечности)", "Иветт (Дочь вечности)", "Вилма (Дочь вечности)"
     ]
     
-    sum_girls_ob = 0
+    sum_regular = 0
+    count_active_regular = 0
+    
+    st.write("**Обычные наложницы:**")
     col1, col2 = st.columns(2)
-    for i, girl in enumerate(girls):
+    for i, girl in enumerate(regular_girls):
         with col1 if i % 2 == 0 else col2:
-            val = st.number_input(f"{girl}:", min_value=0, value=0, key=f"ob_{girl}")
-            sum_girls_ob += val
+            val_str = st.text_input(f"{girl}:", value="", key=f"app_reg_{girl}")
+            if val_str.strip(): 
+                count_active_regular += 1
+                try:
+                    sum_regular += float(val_str)
+                except ValueError:
+                    pass
+
+    st.write("**Дочерей вечности:**")
+    sum_eternity = 0
+    col3, col4 = st.columns(2)
+    for i, girl in enumerate(eternity_girls):
+        with col3 if i % 2 == 0 else col4:
+            val_str = st.text_input(f"{girl}:", value="", key=f"app_et_{girl}")
+            if val_str.strip():
+                try:
+                    sum_eternity += float(val_str)
+                except ValueError:
+                    pass
 
     # МАТЕМАТИКА ОБАЯНИЯ
-    avg_sunduk_val = (ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
-    sunduki_total = red_sunduki * avg_sunduk_val
+    total_concubines_for_hadak = count_active_regular + b4_val
+    hadaki_points = (total_concubines_for_hadak * b8_bel_hadak) + (b9_sin_hadak * 2 * total_concubines_for_hadak)
+    sunduki_points = (b10_val * b11_val) / 100 if b10_val > 0 else 0
     
-    # Массовый эффект хадаков
-    hadak_total = hadak * kol_nalozhnic
-    sin_hadak_total = sin_hadak * val_sin_hadak * kol_nalozhnic
-
     total_ob = (
-        (duhi * 1) + 
-        (ser_shpilka * val_ser_shp) + 
-        (zol_shpilka * 5) + 
-        hadak_total + 
-        sin_hadak_total + 
-        sunduki_total + 
-        furazh + 
-        sum_girls_ob
+        sum_regular + 
+        sum_eternity + 
+        b5_duhi + 
+        (b6_ser_shp * 2.5) + 
+        (b7_zol_shp * 5) + 
+        sunduki_points + 
+        hadaki_points + 
+        (b12_val * 1.5)
     )
     
     st.metric(label="✨ Итоговый прирост Обаяния:", value=f"{int(total_ob)}")
 
 with tab2:
-    st.header("Расчет количества Близости")
+    st.header("Расчет Близости")
     
-    st.subheader("👥 Ваши данные")
-    kol_nalozhnic_bl = st.number_input("Количество наложниц (для расчета Близости):", min_value=1, value=10)
+    st.subheader("👥 Ваши наложницы")
+    bl_b4_val = st.number_input("Общее количество наложниц на аккаунте:", min_value=1, value=10, key="bl_b4")
     
-    st.subheader("📦 Ресурсы со склада")
-    kolca = st.number_input("Самоцветное кольцо (+1 очко):", min_value=0, value=0)
-    sergi = st.number_input("Золотые серьги (+2 очка):", min_value=0, value=0)
+    st.subheader("📦 Предметы со склада")
+    b5_kolca = st.number_input("Самоцветное кольцо (+1):", min_value=0, value=0)
+    b6_sergi = st.number_input("Золотые серьги (+2):", min_value=0, value=0)
+    b7_sandal = st.number_input("Сандаловый браслет (+3.5):", min_value=0, value=0)
+    b8_nefrit = st.number_input("Нефритовый браслет (+5):", min_value=0, value=0)
+    b9_takya = st.number_input("Такъя (+1 ВСЕМ наложницам):", min_value=0, value=0)
+    b10_mass_item = st.number_input("Ордос:", min_value=0, value=0)
+    b11_furazh = st.number_input("Фураж (Близость) [+1.5]:", min_value=0, value=0)
     
-    mode_bl = st.radio("Как калькулировать Сандаловый браслет (2-5 ед.)?", 
-                       ["По гарантированному минимуму (2 очка)", "По среднему значению (3.5 очка)"], 
-                       horizontal=True, key="mode_bl")
-    val_sandal = 2 if "минимуму" in mode_bl else 3.5
-    
-    sandal = st.number_input("Сандаловый браслет (дает 2–5):", min_value=0, value=0)
-    nefrit = st.number_input("Нефритовый браслет (+5 стабильно):", min_value=0, value=0)
-    
-    takya = st.number_input("Такъя (+1 Близости ВСЕМ наложницам):", min_value=0, value=0)
-    ordos = st.number_input("Ордос (+50 очков):", min_value=0, value=0)
-    
-    st.subheader("🌾 Дополнительно")
-    furazh_bl = st.number_input("Фураж (близость):", min_value=0, value=0)
-    
-    # МАТЕМАТИКА БЛИЗОСТИ
-    takya_total = takya * kol_nalozhnic_bl
-    
+    # МАТЕМАТИКА БЛИЗОСТИ ИЗ ВАШЕЙ ФОРМУЛЫ EXCEL
     total_bl = (
-        (kolca * 1) +
-        (sergi * 2) +
-        (sandal * val_sandal) +
-        (nefrit * 5) +
-        takya_total +
-        (ordos * 50) +
-        furazh_bl
+        b5_kolca +
+        (b6_sergi * 2) +
+        (b7_sandal * 3.5) +
+        (b8_nefrit * 5) +
+        (b9_takya * bl_b4_val) +
+        (b10_mass_item * bl_b4_val * 2) +
+        (b11_furazh * 1.5)
     )
     
     st.metric(label="❤️ Итоговый прирост Близости:", value=f"{int(total_bl)}")
