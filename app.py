@@ -3,28 +3,55 @@ import pandas as pd
 
 st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
 st.title("🏆 Калькулятор Ресурсов")
-st.caption(" Мобильная версия")
+st.caption("Мобильная версия")
 
-# Создаем 4 вкладки
-tab1, tab2, tab3, tab4 = st.tabs(["✨ Обаяние", "❤️ Близость", "🏡 Процветание", "⚔️ Таланты и Прокачка"])
+# Создаем 4 вкладки для всех рейтингов
+tab1, tab2, tab3, tab4 = st.tabs([
+    "✨ Обаяние", 
+    "❤️ Близость", 
+    "🏡 Процветание", 
+    "⚔️ Таланты и Прокачка"
+])
 
-# --- ВКЛАДКИ 1, 2, 3 ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ ДЛЯ КОМПАКТНОСТИ ---
+# --- ВКЛАДКА 1: ОБАЯНИЕ ---
 with tab1:
     st.header("Расчет минимального количества Обаяния")
     VAL_DUHI, VAL_SER_SHP, VAL_ZOL_SHP, VAL_HADAK, VAL_SIN_HADAK = 1, 2, 5, 10, 20
+    
+    st.subheader("📦 Ресурсы со склада")
     kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0)
     duhi = st.number_input("Духи:", min_value=0, value=0, key="duhi")
     ser_shpilka = st.number_input("Серебряная шпилька:", min_value=0, value=0, key="ser_shp")
     zol_shpilka = st.number_input("Золотая шпилька:", min_value=0, value=0, key="zol_shp")
     hadak = st.number_input("Хадак:", min_value=0, value=0, key="hadak")
     sin_hadak = st.number_input("Синий Хадак:", min_value=0, value=0, key="sin_hadak")
+    
+    st.subheader("🎁 Сундуки и Фураж")
     red_sunduki = st.number_input("Красные сундуки (кол-во):", min_value=0, value=0, key="sunduki")
     ob_za_100_sun = st.number_input("Сколько обаяния дало 100 красных сундуков?:", min_value=0, value=0, key="sun_100")
     furazh = st.number_input("Фураж (обаяние):", min_value=0, value=0, key="furazh_ob")
+    
+    st.subheader("💃 Наложницы для призыва")
+    girls = [
+        "Бадра", "Маша", "Байлина", "Медея", "Бастет", "Милана", "Ильза", "Ника", 
+        "Ипполита", "Паулина", "Кармилла", "Родия", "Каталин", "Сигрид", "Киара", 
+        "Тамара", "Кларисса", "Табити", "Корэна", "Ува", "Кунегурда", "Улана", 
+        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия", 
+        "Анар (Дочь вечности)", "Земея (Дочь вечности)", "Айрис (Дочь вечности)", 
+        "Амар (Дочь вечности)", "Иветт (Дочь вечности)", "Вилма (Дочь вечности)"
+    ]
+    sum_girls_ob = 0
+    col1, col2 = st.columns(2)
+    for i, girl in enumerate(girls):
+        with col1 if i % 2 == 0 else col2:
+            val = st.number_input(f"{girl}:", min_value=0, value=0, key=f"ob_{girl}")
+            sum_girls_ob += val
+
     avg_sunduk_val = (ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
-    total_ob = (duhi*VAL_DUHI) + (ser_shpilka*VAL_SER_SHP) + (zol_shpilka*VAL_ZOL_SHP) + (hadak*VAL_HADAK) + (sin_hadak*VAL_SIN_HADAK) + (red_sunduki*avg_sunduk_val) + furazh
+    total_ob = (duhi*VAL_DUHI) + (ser_shpilka*VAL_SER_SHP) + (zol_shpilka*VAL_ZOL_SHP) + (hadak*VAL_HADAK) + (sin_hadak*VAL_SIN_HADAK) + (red_sunduki*avg_sunduk_val) + furazh + sum_girls_ob
     st.metric(label="✨ Итого минимальное количество обаяния:", value=f"{int(total_ob)}")
 
+# --- ВКЛАДКА 2: БЛИЗОСТЬ ---
 with tab2:
     st.header("Расчет минимального количества Близости")
     VAL_KOLCO, VAL_SERGI, VAL_SANDAL, VAL_NEFRIT, VAL_TAKYA, VAL_ORDOS = 1, 2, 5, 10, 20, 50
@@ -38,6 +65,7 @@ with tab2:
     total_bl = (kolca*VAL_KOLCO) + (sergi*VAL_SERGI) + (sandal*VAL_SANDAL) + (nefrit*VAL_NEFRIT) + (takya*VAL_TAKYA) + (ordos*VAL_ORDOS) + furazh_bl
     st.metric(label="❤️ Итого минимальное количество близости:", value=f"{int(total_bl)}")
 
+# --- ВКЛАДКА 3: ПРОЦВЕТАНИЕ ---
 with tab3:
     st.header("Расчет минимального количества Процветания")
     agat = st.number_input("Чёрный агат (300 очков):", min_value=0, value=0, key="agat")
@@ -46,13 +74,12 @@ with tab3:
     total_procvetanie = (agat * 300) + (kedr * 100) + (lenty * 50)
     st.metric(label="🏡 Итого количество процветания:", value=f"{total_procvetanie}")
 
-
-# --- ОБНОВЛЕННАЯ ИНТЕРАКТИВНАЯ ВКЛАДКА С ТАЛАНТАМИ ---
+# --- ВКЛАДКА 4: ТАЛАНТЫ (ПОЛНАЯ СБОРКА) ---
 with tab4:
     st.header("⚔️ Распределитель Опыта и Талантов")
     
-    # 1. Сначала считаем независимый блок мешков (они идут сразу в рейтинг)
-    st.subheader("💰 1. Мешки талантов (паками по 100)")
+    # --- БЛОК 1: МЕШКИ (Пакетами по 100) ---
+    st.subheader("💰 1. Мешки талантов (вероятностные)")
     total_bags_pool = st.number_input("Количество мешков талантов на складе:", min_value=0, value=0, step=100, key="pool_bags")
     target_talent = st.selectbox(
         "Куда сливаем паки мешков?",
@@ -61,6 +88,11 @@ with tab4:
     
     bags_points = 0
     full_hundreds = total_bags_pool // 100
+    leftover_bags = total_bags_pool % 100
+    
+    if total_bags_pool > 0:
+        st.info(f"Мешки разделены на: {full_hundreds} паков по 100 шт. Остаток: {leftover_bags} шт.")
+
     if target_talent == "В Серый (1★)": bags_points = full_hundreds * 100
     elif target_talent == "В Зелёный (2★)": bags_points = full_hundreds * 100
     elif target_talent == "В Синий (3★)": bags_points = full_hundreds * 102
@@ -70,102 +102,102 @@ with tab4:
 
     st.divider()
 
-    # 2. ИНТЕРАКТИВНЫЙ БЛОК: Свитки опыта и закрытие звезд
-    st.subheader("📜 2. Распределение Свитков Опыта")
+    # --- БЛОК 2: ЖЕТОНЫ (100% успех, прокачка по звездам) ---
+    st.subheader("🎟️ 2. Жетоны талантов (100% успех)")
+    st.caption("Впишите количество ваших жетонов поштучно:")
     
-    # Инициализируем переменные в памяти приложения, если их еще нет
-    if "spent_points" not in st.session_state:
-        st.session_state.spent_points = 0  # Сколько очков опыта потрачено на звезды
-    if "earned_rating" not in st.session_state:
-        st.session_state.earned_rating = 0  # Сколько очков рейтинга за это получено
+    col_j1, col_j2 = st.columns(2)
+    with col_j1:
+        zh_grey = st.number_input("Жетоны в Серый (1★ — 200 очков):", min_value=0, value=0, key="zh_grey")
+        zh_blue = st.number_input("Жетоны в Синий (3★ — 600 очков):", min_value=0, value=0, key="zh_blue")
+        zh_orange = st.number_input("Жетоны в Оранжевый (5★ — 1000 очков):", min_value=0, value=0, key="zh_orange")
+    with col_j2:
+        zh_green = st.number_input("Жетоны в Зелёный (2★ — 400 очков):", min_value=0, value=0, key="zh_green")
+        zh_purple = st.number_input("Жетоны в Фиолетовый (4★ — 800 очков):", min_value=0, value=0, key="zh_purple")
+        zh_red = st.number_input("Жетоны в Красный (6★ — 1200 очков):", min_value=0, value=0, key="zh_red")
 
-    input_svitki = st.number_input("Введите количество ваших свитков опыта советника:", min_value=0, value=0, step=1)
-    total_experience_pool = input_svitki * 50
+    tokens_points = (
+        (zh_grey * 200) +
+        (zh_green * 400) +
+        (zh_blue * 600) +
+        (zh_purple * 800) +
+        (zh_orange * 1000) +
+        (zh_red * 1200)
+    )
+
+    st.divider()
+
+    # --- БЛОК 3: ИНТЕРАКТИВНЫЕ СВИТКИ ОПЫТА ---
+    st.subheader("📜 3. Распределение Свитков Опыта")
     
-    # Считаем текущий остаток баланса опыта
+    if "spent_points" not in st.session_state:
+        st.session_state.spent_points = 0
+    if "earned_rating" not in st.session_state:
+        st.session_state.earned_rating = 0
+
+    input_svitki = st.number_input("Количество ваших свитков опыта советника (1 шт = 50 оп):", min_value=0, value=0, step=1)
+    total_experience_pool = input_svitki * 50
     current_balance = total_experience_pool - st.session_state.spent_points
 
-    # Если пользователь изменил начальное число свитков в меньшую сторону, сбрасываем траты
     if current_balance < 0:
         st.session_state.spent_points = 0
         st.session_state.earned_rating = 0
         current_balance = total_experience_pool
 
-    # Показываем красивый счетчик доступного опыта отдельно
     st.info(f"💡 Всего опыта от свитков: {total_experience_pool} | ОСТАТОК БАЛАНСА: {current_balance} очков")
-
-    # Стоимость закрытия звезд в опыте
-    stars_cost = {
-        "Серый (1★)": 200,
-        "Зелёный (2★)": 400,
-        "Синий (3★)": 600,
-        "Фиолетовый (4★)": 800,
-        "Оранжевый (5★)": 1000,
-        "Красный (6★)": 1200
-    }
-
-    st.write("Нажмите кнопку, чтобы влить опыт и закрыть звезду советнику:")
+    st.write("Нажмите кнопку, чтобы потратить накопленный опыт и прокачать звезду:")
     
-    # Создаем кнопки для каждой звезды
     col_b1, col_b2, col_b3 = st.columns(3)
-    
     with col_b1:
         if st.button("🌟 Закрыть Серую (1★) [-200 оп.]"):
             if current_balance >= 200:
                 st.session_state.spent_points += 200
-                st.session_state.earned_rating += 1  # Добавляем 1 очко в рейтинг таланта
+                st.session_state.earned_rating += 200
                 st.rerun()
             else: st.error("Недостаточно опыта!")
-            
         if st.button("🌟 Закрыть Фиолет (4★) [-800 оп.]"):
             if current_balance >= 800:
                 st.session_state.spent_points += 800
-                st.session_state.earned_rating += 4
+                st.session_state.earned_rating += 800
                 st.rerun()
             else: st.error("Недостаточно опыта!")
-
     with col_b2:
         if st.button("🌟 Закрыть Зеленую (2★) [-400 оп.]"):
             if current_balance >= 400:
                 st.session_state.spent_points += 400
-                st.session_state.earned_rating += 2
+                st.session_state.earned_rating += 400
                 st.rerun()
             else: st.error("Недостаточно опыта!")
-            
         if st.button("🌟 Закрыть Оранж (5★) [-1000 оп.]"):
             if current_balance >= 1000:
                 st.session_state.spent_points += 1000
-                st.session_state.earned_rating += 5
+                st.session_state.earned_rating += 1000
                 st.rerun()
             else: st.error("Недостаточно опыта!")
-
     with col_b3:
         if st.button("🌟 Закрыть Синюю (3★) [-600 оп.]"):
             if current_balance >= 600:
                 st.session_state.spent_points += 600
-                st.session_state.earned_rating += 3
+                st.session_state.earned_rating += 600
                 st.rerun()
             else: st.error("Недостаточно опыта!")
-            
         if st.button("🌟 Закрыть Красную (6★) [-1200 оп.]"):
             if current_balance >= 1200:
                 st.session_state.spent_points += 1200
-                st.session_state.earned_rating += 6
+                st.session_state.earned_rating += 1200
                 st.rerun()
             else: st.error("Недостаточно опыта!")
 
-    if st.button("🔄 Сбросить распределение опыта"):
+    if st.button("🔄 Сбросить распределение опыта свитков"):
         st.session_state.spent_points = 0
         st.session_state.earned_rating = 0
         st.rerun()
 
     st.divider()
 
-    # --- ИТОГОВЫЙ БЛОК ГАРАНТИРОВАННОГО РЕЙТИНГА ---
+    # --- ИТОГОВЫЙ БЛОК РЕЙТИНГА ТАЛАНТОВ ---
     st.subheader("📊 Итог по рейтингу")
+    final_talent_rating = bags_points + tokens_points + st.session_state.earned_rating
     
-    # Общая сумма гарантированных очков в рейтинг: мешки + очки за успешно закрытые звездами свитки
-    final_talent_rating = bags_points + st.session_state.earned_rating
+    st.metric(label="⚔️ Всего гарантированных ОЧКОВ ТАЛАНТА в рейтинг:", value=f"{int(final_talent_rating)}")
     
-    st.metric(label="⚔️ Всего гарантированных ОЧКОВ ТАЛАНТА в рейтинг:", value=f"{final_talent_rating}")
-    st.caption(f"(Из них от мешков: {bags_points} очков, от закрытых свитками звезд: {st.session_state.earned_rating} очков)")
