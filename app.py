@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Калькулятор Великого Хана", layout="centered")
 st.title("🏆 Калькулятор Ресурсов")
-st.caption(" Мобильная версия")
+st.caption("by ТаЙга | Мобильная версия")
 
 # Создаем 4 вкладки для всех ваших рейтингов
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -108,7 +108,7 @@ with tab3:
 
     st.subheader("📦 Ресурсы со склада")
     agat = st.number_input("Чёрный агат (300 очков):", min_value=0, value=0, key="agat")
-    kedr = st.number_input("Зимний кедр (100 очков):", min_value=0, value=0, key="kedr")
+    kedr = st.number_input("Зимний кeдр (100 очков):", min_value=0, value=0, key="kedr")
     lenty = st.number_input("Цветные ленты (50 очков):", min_value=0, value=0, key="lenty")
     
     total_procvetanie = (agat * VAL_AGAT) + (kedr * VAL_KEDR) + (lenty * VAL_LENTY)
@@ -136,13 +136,11 @@ with tab4:
     if total_bags_pool > 0:
         st.info(f"Мешки разделены на: {full_hundreds} паков по 100 шт. Остаток: {leftover_bags} шт.")
 
-    # Радио-кнопка для выбора, куда игрок хочет залить мешки
     target_talent = st.selectbox(
         "Куда планируете влить полные паки мешков?",
         ["Не вливать мешки", "В Серый талант (1★)", "В Зелёный талант (2★)", "В Синий талант (3★)", "В Фиолетовый талант (4★)", "В Оранжевый талант (5★)", "В Красный талант (6★)"]
     )
     
-    # Считаем очки от мешков
     bags_points = 0
     if target_talent == "В Серый талант (1★)": bags_points = full_hundreds * POINTS_PER_100_GREY
     elif target_talent == "В Зелёный талант (2★)": bags_points = full_hundreds * POINTS_PER_100_GREEN
@@ -153,33 +151,38 @@ with tab4:
 
     st.divider()
 
-    # --- БЛОК 2: ЖЕТОНЫ (100% успех) ---
+    # --- БЛОК 2: ЖЕТОНЫ (Новая математика) ---
     st.subheader("🎟️ 2. Жетоны талантов (100% успех)")
-    st.caption("Впишите количество поштучно под каждый тип таланта:")
+    st.caption("Каждый жетон дает фиксированные очки опыта в зависимости от звезды таланта")
     
     col_j1, col_j2 = st.columns(2)
     with col_j1:
-        zh_grey = st.number_input("Жетоны в Серый (1★):", min_value=0, value=0, key="zh_grey")
-        zh_blue = st.number_input("Жетоны в Синий (3★):", min_value=0, value=0, key="zh_blue")
-        zh_orange = st.number_input("Жетоны в Оранжевый (5★):", min_value=0, value=0, key="zh_orange")
+        zh_grey = st.number_input("Жетоны в Серый (1★ — 200 очков):", min_value=0, value=0, key="zh_grey")
+        zh_blue = st.number_input("Жетоны в Синий (3★ — 600 очков):", min_value=0, value=0, key="zh_blue")
+        zh_orange = st.number_input("Жетоны в Оранжевый (5★ — 1000 очков):", min_value=0, value=0, key="zh_orange")
     with col_j2:
-        zh_green = st.number_input("Жетоны в Зелёный (2★):", min_value=0, value=0, key="zh_green")
-        zh_purple = st.number_input("Жетоны в Фиолетовый (4★):", min_value=0, value=0, key="zh_purple")
-        zh_red = st.number_input("Жетоны в Красный (6★):", min_value=0, value=0, key="zh_red")
+        zh_green = st.number_input("Жетоны в Зелёный (2★ — 400 очков):", min_value=0, value=0, key="zh_green")
+        zh_purple = st.number_input("Жетоны в Фиолетовый (4★ — 800 очков):", min_value=0, value=0, key="zh_purple")
+        zh_red = st.number_input("Жетоны в Красный (6★ — 1200 очков):", min_value=0, value=0, key="zh_red")
 
-    # Считаем очки от жетонов (кол-во * количество звезд)
     tokens_points = (
-        (zh_grey * 1) +
-        (zh_green * 2) +
-        (zh_blue * 3) +
-        (zh_purple * 4) +
-        (zh_orange * 5) +
-        (zh_red * 6)
+        (zh_grey * 200) +
+        (zh_green * 400) +
+        (zh_blue * 600) +
+        (zh_purple * 800) +
+        (zh_orange * 1000) +
+        (zh_red * 1200)
     )
 
+    st.divider()
+
+    # --- БЛОК 3: СВИТКИ ОПЫТА ---
+    st.subheader("📜 3. Свитки опыта")
+    svitki = st.number_input("Количество свитков опыта (1 свиток = 50 очков):", min_value=0, value=0, key="svitki")
+    svitki_points = svitki * 50
     # --- ОБЩИЙ ИТОГ ПО ТАЛАНТАМ ---
     st.divider()
-    total_all_talents = bags_points + tokens_points
+    total_all_talents = bags_points + tokens_points + svitki_points
     
     st.metric(label="⚔️ Всего гарантированных очков таланта:", value=f"{total_all_talents}")
     if leftover_bags > 0 and target_talent != "Не вливать мешки":
