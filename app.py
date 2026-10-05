@@ -14,41 +14,67 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 # --- ВКЛАДКА 1: ОБАЯНИЕ ---
+
 with tab1:
-    st.header("Расчет минимального количества Обаяния")
-    VAL_DUHI, VAL_SER_SHP, VAL_ZOL_SHP, VAL_HADAK, VAL_SIN_HADAK = 1, 2, 5, 10, 20
+    st.header("Расчет минимального количества Обаяния (ПРО-версия)")
     
     st.subheader("📦 Ресурсы со склада")
-    kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0)
-    duhi = st.number_input("Духи:", min_value=0, value=0, key="duhi")
-    ser_shpilka = st.number_input("Серебряная шпилька:", min_value=0, value=0, key="ser_shp")
-    zol_shpilka = st.number_input("Золотая шпилька:", min_value=0, value=0, key="zol_shp")
-    hadak = st.number_input("Хадак:", min_value=0, value=0, key="hadak")
-    sin_hadak = st.number_input("Синий Хадак:", min_value=0, value=0, key="sin_hadak")
+    kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0, key="kol_nalozhnic")
+    duhi = st.number_input("Духи :", min_value=0, value=0, key="duhi")
+    ser_shpilka = st.number_input("Серебряная шпилька :", min_value=0, value=0, key="ser_shp")
+    zol_shpilka = st.number_input("Золотая шпилька :", min_value=0, value=0, key="zol_shp")
+    hadak = st.number_input("Хадак :", min_value=0, value=0, key="hadak")
+    sin_hadak = st.number_input("Синий Хадак :", min_value=0, value=0, key="sin_hadak")
     
     st.subheader("🎁 Сундуки и Фураж")
     red_sunduki = st.number_input("Красные сундуки (кол-во):", min_value=0, value=0, key="sunduki")
     ob_za_100_sun = st.number_input("Сколько обаяния дало 100 красных сундуков?:", min_value=0, value=0, key="sun_100")
-    furazh = st.number_input("Фураж (обаяние):", min_value=0, value=0, key="furazh_ob")
+    furazh = st.number_input("Фураж :", min_value=0, value=0, key="furazh_ob")
     
     st.subheader("💃 Наложницы для призыва")
+    st.caption("Вписывайте значение только для тех наложниц, которых планируете призвать в рейтинг")
+    
     girls = [
         "Бадра", "Маша", "Байлина", "Медея", "Бастет", "Милана", "Ильза", "Ника", 
         "Ипполита", "Паулина", "Кармилла", "Родия", "Каталин", "Сигрид", "Киара", 
         "Тамара", "Кларисса", "Табити", "Корэна", "Ува", "Кунегурда", "Улана", 
-        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия", 
+        "Людмила", "Фазара", "Марика", "Фрейя", "Марико", "Юлия" , "Линьи",
         "Анар (Дочь вечности)", "Земея (Дочь вечности)", "Айрис (Дочь вечности)", 
         "Амар (Дочь вечности)", "Иветт (Дочь вечности)", "Вилма (Дочь вечности)"
     ]
+    
     sum_girls_ob = 0
+    new_girls_count = 0  # Счётчик призванных девушек (аналог COUNTA в Excel)
+    
     col1, col2 = st.columns(2)
     for i, girl in enumerate(girls):
         with col1 if i % 2 == 0 else col2:
             val = st.number_input(f"{girl}:", min_value=0, value=0, key=f"ob_{girl}")
-            sum_girls_ob += val
+            if val > 0:
+                sum_girls_ob += val
+                new_girls_count += 1
 
-    avg_sunduk_val = (ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
-    total_ob = (duhi*VAL_DUHI) + (ser_shpilka*VAL_SER_SHP) + (zol_shpilka*VAL_ZOL_SHP) + (hadak*VAL_HADAK) + (sin_hadak*VAL_SIN_HADAK) + (red_sunduki*avg_sunduk_val) + furazh + sum_girls_ob
+    # Общее число наложниц с учётом призываемых
+    total_girls = kol_nalozhnic + new_girls_count
+
+    # Расчёт по формуле ПРО-версии из Excel:
+    sunduki_points = (red_sunduki * ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
+    hadak_points = hadak * total_girls
+    sin_hadak_points = sin_hadak * 2 * total_girls
+    furazh_points = furazh * 1.5
+
+    total_ob = (
+        sum_girls_ob
+        + (duhi * 1.0)
+        + (ser_shpilka * 2.5)
+        + (zol_shpilka * 5.0)
+        + sunduki_points
+        + hadak_points
+        + sin_hadak_points
+        + furazh_points
+    )
+    
+    st.info(f"👥 Всего наложниц для массовых предметов: **{total_girls}** (на складе: {kol_nalozhnic}, призывается: {new_girls_count})")
     st.metric(label="✨ Итого минимальное количество обаяния:", value=f"{int(total_ob)}")
 
 # --- ВКЛАДКА 2: БЛИЗОСТЬ ---
