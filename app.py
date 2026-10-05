@@ -16,7 +16,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # --- ВКЛАДКА 1: ОБАЯНИЕ ---
 
 with tab1:
-    st.header("Расчет минимального количества Обаяния (ПРО-версия)")
+    st.header("Расчет минимального количества Обаяния")
     
     st.subheader("📦 Ресурсы со склада")
     kol_nalozhnic = st.number_input("Количество наложниц:", min_value=0, value=0, key="kol_nalozhnic")
