@@ -44,7 +44,7 @@ with tab1:
     ]
     
     sum_girls_ob = 0
-    new_girls_count = 0  # Счётчик призванных девушек (аналог COUNTA в Excel)
+    new_girls_count = 0 
     
     col1, col2 = st.columns(2)
     for i, girl in enumerate(girls):
@@ -57,7 +57,7 @@ with tab1:
     # Общее число наложниц с учётом призываемых
     total_girls = kol_nalozhnic + new_girls_count
 
-    # Расчёт по формуле ПРО-версии из Excel:
+
     sunduki_points = (red_sunduki * ob_za_100_sun / 100) if ob_za_100_sun > 0 else 0
     hadak_points = hadak * total_girls
     sin_hadak_points = sin_hadak * 2 * total_girls
@@ -80,15 +80,32 @@ with tab1:
 # --- ВКЛАДКА 2: БЛИЗОСТЬ ---
 with tab2:
     st.header("Расчет минимального количества Близости")
-    VAL_KOLCO, VAL_SERGI, VAL_SANDAL, VAL_NEFRIT, VAL_TAKYA, VAL_ORDOS = 1, 2, 5, 10, 20, 50
+    
+    kol_nalozhnic_bl = st.number_input(
+        "Количество наложниц:", 
+        min_value=0, 
+        value=0, 
+        key="kol_nalozhnic_bl"
+    )
     kolca = st.number_input("Кольца:", min_value=0, value=0, key="kolca")
     sergi = st.number_input("Серьги:", min_value=0, value=0, key="sergi")
     sandal = st.number_input("Сандаловый браслет:", min_value=0, value=0, key="sandal")
     nefrit = st.number_input("Нефритовый браслет:", min_value=0, value=0, key="nefrit")
     takya = st.number_input("Такъя:", min_value=0, value=0, key="takya")
     ordos = st.number_input("Ордос:", min_value=0, value=0, key="ordos")
-    furazh_bl = st.number_input("Фураж (близость):", min_value=0, value=0, key="furazh_bl")
-    total_bl = (kolca*VAL_KOLCO) + (sergi*VAL_SERGI) + (sandal*VAL_SANDAL) + (nefrit*VAL_NEFRIT) + (takya*VAL_TAKYA) + (ordos*VAL_ORDOS) + furazh_bl
+    furazh_bl = st.number_input("Фураж:", min_value=0, value=0, key="furazh_bl")
+
+
+    total_bl = (
+        (kolca * 1.0)
+        + (sergi * 2.0)
+        + (sandal * 3.5)
+        + (nefrit * 5.0)
+        + (takya * kol_nalozhnic_bl)
+        + (ordos * 2 * kol_nalozhnic_bl)
+        + (furazh_bl * 1.5)
+    )
+
     st.metric(label="❤️ Итого минимальное количество близости:", value=f"{int(total_bl)}")
 
 # --- ВКЛАДКА 3: ПРОЦВЕТАНИЕ ---
@@ -128,7 +145,7 @@ with tab4:
 
     st.divider()
 
-    # --- БЛОК 2: ЖЕТОНЫ (100% успех, прокачка по звездам) ---
+    # --- БЛОК 2: ЖЕТОНЫ  ---
     st.subheader("🎟️ 2. Жетоны талантов (100% успех)")
     st.caption("Впишите количество ваших жетонов поштучно:")
     
